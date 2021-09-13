@@ -1,22 +1,25 @@
 # frozen_string_literal: true
 
 class User
-  attr_reader :attributes
+  attr_reader :attributes, :allowed
 
   def initialize
+    @allowed = [:id, :email, :name]
     @attributes = {}
   end
 
   def method_missing(name, *args, &block)
-    if name.end_with?("=")
+    if !respond_to_missing?(name)
+      super
+    elsif name.end_with?('=')
       @attributes[name.to_s[0..-2].to_sym] = args.first
     else
       @attributes[name]
     end
   end
 
-  def respond_to?(name)
-    true
+  def respond_to_missing?(name, *)
+    @allowed.include?(name.to_s.gsub('=', '').to_sym)
   end
 end
 
@@ -24,5 +27,7 @@ user = User.new
 p user.respond_to?(:email)
 p user.respond_to?(:email=)
 p user.respond_to?(:upcase)
-p user.upcase
 
+p.user.method(:email)
+# p.user.method(:email=)
+# p.user.method(:upcase)
